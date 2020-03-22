@@ -11,6 +11,16 @@ values = reactiveValues(players = NULL,
                         endOfRound = NULL)
 
 server <- function(input, output, session) { 
+  # refresh button for when stuff gets weird
+  observeEvent(input$reset_button, {
+    # Reset all notes again to zero
+    values$notes_df <- NULL
+    values$notes <- NULL
+    values$players <- NULL
+    values$people_looking_at_notes = NULL
+    values$endOfRound = NULL
+    values$gameStart = NULL
+  }) 
   # ================================ #
   # 1) Add new player to the game ####
   # ================================ #
@@ -166,10 +176,53 @@ server <- function(input, output, session) {
           txt = paste0("<details>",summary,"<ul style ='list-style-type: none;'>",details,"</ul></details>"))
       
       div(box(width = 3, HTML(htmlText$txt)),
-          box(width = 9, div(actionButton("take_note","Take a note"),
-                             uiOutput('someone_took_a_note'))))
+          box(width = 9, fluidRow(column(4,div(actionButton("take_note","Pick a note"),
+                                               uiOutput('someone_took_a_note'))),
+                                  column(8,uiOutput('timer')))
+                             ))
     })
   })
+  
+  # Stopwatch: https://stackoverflow.com/questions/49250167/how-to-create-a-countdown-timer-in-shiny
+  # Initialize the timer, 30 seconds, not active.
+  timer <- reactiveVal(30)
+  active <- reactiveVal(FALSE)
+  # Initialize the timer, 30 seconds, not active.
+  output$timer <- renderUI({
+    #div(style='background-color:orange;margin-left:5px;border-style:solid;border-color:green;border-spacing:20px;border-width:1px',
+        wellPanel(style = "width: 250px; background-color:#a1a1a1; border-radius: 5%", 
+                  h2('Stopwatch'),  
+            fluidRow(column(6,numericInput('seconds','Seconds:',value=30,min=0,max=99999,step=1)), 
+                     column(6,actionButton('start','Start'))),
+            uiOutput('timeleft'))
+  })
+  # Output the time left.
+  output$timeleft <- renderUI({
+    HTML(paste0("<p>Time left: <b style='color:red;font-size:20px'>", timer(),"</b></span>"))
+  })
+  # observer that invalidates every second. If timer is active, decrease by one.
+  observe({
+    invalidateLater(1000, session)
+    isolate({
+      if(active())
+      { timer(timer()-1)
+        if(timer()<1)
+        { active(FALSE)
+          showModal(modalDialog(
+            title = "Sorry buddy...",
+            "YOUR TIME IS UP!"
+          ))
+        }
+      }
+    })
+  })
+  # observers for actionbuttons
+  observeEvent(input$start, {
+    timer(input$seconds)
+    active(TRUE)
+  })
+  
+  # Show who is looking at notes
   output$someone_took_a_note <- renderUI({
     if (is.null(values$people_looking_at_notes)) {return(NULL)}
     if (length(values$people_looking_at_notes) == 0) {return(NULL)}
