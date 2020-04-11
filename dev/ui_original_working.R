@@ -12,7 +12,7 @@ values = reactiveValues(players = NULL,
 
 ui <- fluidPage(theme = shinytheme("superhero"),
                 tags$style("body {font-family: 'Comic Sans MS' !important;}"),
-                tags$style(".btn {border-radius: 5%; margin-bottom:20px !important}"),
+                tags$style(".btn {border-radius: 5% !important}"),
                 tags$style("#reset_button {font-size: 50% !important}"),
                 tags$style("#start {margin-top: 23px; !important}"),
                 tags$style(type='text/css', "#add_notes {margin-top: 23px;}"),
