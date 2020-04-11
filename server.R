@@ -303,6 +303,7 @@ server <- function(input, output, session) {
         values$timer <- timer()
         if(timer()<1)
         { active(FALSE)
+          values$people_looking_at_notes <- values$people_looking_at_notes[!values$people_looking_at_notes %in% session$token]
           showModal(modalDialog(
             title = "Sorry buddy...",
             "YOUR TIME IS UP!"
