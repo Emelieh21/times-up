@@ -329,10 +329,10 @@ server <- function(input, output, session) {
   observeEvent(input$take_note, {
     # keep track of who is looking at notes...
     values$people_looking_at_notes <- c(values$people_looking_at_notes, session$token)
-    i <- sample(1:nrow(values$notes_df[values$notes_df$guessed==0,]),1)
+    values$i <- sample(1:nrow(values$notes_df[values$notes_df$guessed==0,]),1)
     # see here: https://shiny.rstudio.com/reference/shiny/latest/modalDialog.html
     showModal(modalDialog(title = "Your Note",
-                          h1(values$notes_df$notes[values$notes_df$guessed==0][i]),
+                          h1(values$notes_df$notes[values$notes_df$guessed==0][values$i]),
                           footer = tagList(
                             actionButton("cancel", "Cancel"),
                             actionButton("point", "Someone guessed it!")
@@ -346,7 +346,7 @@ server <- function(input, output, session) {
   observeEvent(input$point, {
     # One point for the player/team
     values$players$score[values$players$session_token == session$token] <- 1 + values$players$score[values$players$session_token == session$token]
-    values$notes_df$guessed[values$notes_df$guessed==0][1] = 1
+    values$notes_df$guessed[values$notes_df$guessed==0][values$i] = 1
     values$people_looking_at_notes <- values$people_looking_at_notes[!values$people_looking_at_notes %in% session$token]
     removeModal()
     
